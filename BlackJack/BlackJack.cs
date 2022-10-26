@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,39 +9,50 @@ namespace BlackJack
 {
     internal class BlackJackMastermind
     {
-        static List<decimal> mastermind = new List<decimal>();
+        static bool start = false;
         static void Main(string[] args)
         {
+            Console.WriteLine("何回シミュレーションしますか？");
+            BlackJackSimulation.maxSim = int.Parse(Console.ReadLine());
             new BlackJackSimulation();
+            for(int i = 0; i < 1;)
+            {
+                if(start == true)
+                {
+                    new BlackJackSimulation();
+                    start = false;
+                }
+            }
         }
         public static void Next(decimal lossRate)
         {
-            mastermind.Add(lossRate);
-            Console.WriteLine("totalLossRate: " + Average() * 100);
             if(Console.ReadLine() != null)
             {
+                start = true;
             }
-        }
-        private static decimal Average()
-        {
-            decimal sum = 0;
-            foreach (decimal value in mastermind)
-            {
-                sum = sum + value;
-            }
-            return sum / mastermind.Count;
         }
     }
     internal class BlackJackSimulation
     {
+        public static int maxSim = 10000;
         static int simCount = 1;
         static int totalmoney = 10000;
+        public static bool finished = true;
+
         public BlackJackSimulation()
         {
             simCount = 1;
             totalmoney = 10000;
             BlackJackGame.DataInitialization();
-            new BlackJackGame(Trunp.PickRandom());
+            for(int i = 0; i < 1;)
+            {
+                if(finished == true)
+                {
+                    finished = false;
+                    Console.WriteLine("Foo");
+                    new BlackJackGame(Trunp.PickRandom());
+                }
+            }
         }
         public static void Stand(int playerCardSum ,int bet, int parentCard, int cloneFlag)
         {
@@ -76,18 +87,19 @@ namespace BlackJack
         public static void End(int cloneFlag)
         {
             Console.WriteLine(totalmoney);
-            if (simCount < 1000)
+            if (simCount < maxSim)
             {
                 if(cloneFlag == 0)
                 {
                     simCount++;
                     Console.WriteLine("BlackJackSimulation has occured " + (simCount - 1) + " times");
-                    new BlackJackGame(Trunp.PickRandom());
+                    finished = true;
+                    
                 }
             } else
             {
-                decimal lossRate = (decimal)(10000 - totalmoney) / (simCount * 10000);
-                Console.WriteLine(lossRate.ToString("P4"));
+                decimal lossRate = (decimal)1 - (decimal)(10000 - totalmoney) / (simCount * 100);
+                Console.WriteLine(lossRate.ToString("P6"));
                 BlackJackMastermind.Next(lossRate);
             }
         }
@@ -145,7 +157,6 @@ namespace BlackJack
             "4444444444";
         private static int[,] pairStrategy = new int[10, 10];
         private const string pairStrategyData =
-            "3333333333" +
             "3333331111" +
             "1333331111" +
             "1113311111" +
@@ -154,9 +165,9 @@ namespace BlackJack
             "3333331111" +
             "3333333111" +
             "3333343344" +
-            "4444444444";
+            "4444444444" +
+            "3333333333";
         List<int> playerCards = new List<int>();
-        static int end = 0;
         int act = 0;
         int actRemaining = 2;
         int bet = 0;
@@ -181,7 +192,6 @@ namespace BlackJack
             if (Trunp.IDtoValue(playerCards[0]) == 11 && Trunp.IDtoValue(playerCards[1]) == 10)
             {
                 Console.WriteLine("BlackJack!!");
-                end++;
                 BlackJackSimulation.Win((int)(bet * 0.5), cloneFlag);
             }
             else
@@ -191,7 +201,6 @@ namespace BlackJack
         }
         public BlackJackGame(int parentCard, int act, int splitCard, int cloneFlag)
         {
-            Console.WriteLine("end: " + end);
             this.cloneFlag = cloneFlag;
             actRemaining = act;
             bet = 100;
@@ -202,7 +211,6 @@ namespace BlackJack
         }
         private void ChooseAct(int type)
         {
-            Console.WriteLine("end: " + end);
             Console.Write("playerCard: ");
             Trunp.DisplayCards(playerCards);
             if (actRemaining > 0)
@@ -247,7 +255,6 @@ namespace BlackJack
                         ph = Trunp.PickRandom();
                         Console.WriteLine("got: " + ph);
                         playerCards.Add(ph);
-                        end++;
                         BlackJackSimulation.Stand(SumPlayer(), bet, parentCard, cloneFlag);
                         break;
                     case 3:
@@ -260,13 +267,11 @@ namespace BlackJack
                         ChooseAct(2);
                         break;
                     default:
-                        end++;
                         BlackJackSimulation.Stand(SumPlayer(),bet,parentCard, cloneFlag);
                         break;
                 }
             } else
             {
-                end++;
                 BlackJackSimulation.Stand(SumPlayer(), bet, parentCard, cloneFlag);
             }
         }
@@ -287,7 +292,6 @@ namespace BlackJack
         {
             if(SumPlayer() > 21)
             {
-                end++;
                 BlackJackSimulation.Lose(bet, cloneFlag);
             } else
             {
