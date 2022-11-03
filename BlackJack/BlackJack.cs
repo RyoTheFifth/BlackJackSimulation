@@ -7,49 +7,23 @@ using BlackJack;
 
 namespace BlackJack
 {
-    internal class BlackJackMastermind
-    {
-        static bool start = false;
-        static void Main(string[] args)
-        {
-            Console.WriteLine("何回シミュレーションしますか？");
-            BlackJackSimulation.maxSim = int.Parse(Console.ReadLine());
-            new BlackJackSimulation();
-            for(int i = 0; i < 1;)
-            {
-                if(start == true)
-                {
-                    new BlackJackSimulation();
-                    start = false;
-                }
-            }
-        }
-        public static void Next(decimal lossRate)
-        {
-            if(Console.ReadLine() != null)
-            {
-                start = true;
-            }
-        }
-    }
     internal class BlackJackSimulation
     {
         public static int maxSim = 10000;
         static int simCount = 1;
         static int totalmoney = 10000;
         public static bool finished = true;
-
-        public BlackJackSimulation()
+        static void Main(string[] args)
         {
+            Console.WriteLine("何回シミュレーションしますか？");
+            maxSim = int.Parse(Console.ReadLine());
             simCount = 1;
             totalmoney = 10000;
-            BlackJackGame.DataInitialization();
-            for(int i = 0; i < 1;)
+            for (int i = 0; i < 1;)
             {
-                if(finished == true)
+                if (finished == true)
                 {
                     finished = false;
-                    Console.WriteLine("Foo");
                     new BlackJackGame(Trunp.PickRandom());
                 }
             }
@@ -94,13 +68,11 @@ namespace BlackJack
                     simCount++;
                     Console.WriteLine("BlackJackSimulation has occured " + (simCount - 1) + " times");
                     finished = true;
-                    
                 }
             } else
             {
                 decimal lossRate = (decimal)1 - (decimal)(10000 - totalmoney) / (simCount * 100);
                 Console.WriteLine(lossRate.ToString("P6"));
-                BlackJackMastermind.Next(lossRate);
             }
         }
         private static int SumParent(List<int> parentCards)
@@ -131,42 +103,39 @@ namespace BlackJack
     }
     internal class BlackJackGame
     {
-        private static int[,] sumStrategy = new int[10, 10];
-        private const string sumStrategyData = 
-            "1111111111" +
-            "1222211111" +
-            "2222222211" +
-            "2222222221" +
-            "1144411111" +
-            "4444411111" +
-            "4444411111" +
-            "4444441111" +
-            "4444441111" +
-            "4444444444";
-        private static int[,] aceStrategy = new int[10, 10];
-        private const string aceStrategyData =
-            "1112211111" +
-            "1112211111" +
-            "1122211111" +
-            "1122211111" +
-            "1222211111" +
-            "4222244111" +
-            "4444444444" +
-            "4444444444" +
-            "4444444444" +
-            "4444444444";
-        private static int[,] pairStrategy = new int[10, 10];
-        private const string pairStrategyData =
-            "3333331111" +
-            "1333331111" +
-            "1113311111" +
-            "2222222211" +
-            "3333331111" +
-            "3333331111" +
-            "3333333111" +
-            "3333343344" +
-            "4444444444" +
-            "3333333333";
+        private int[,] sumStrategy = new int[10, 10] {
+            {1,1,1,1,1,1,1,1,1,1},
+            {1,2,2,2,2,1,1,1,1,1},
+            {2,2,2,2,2,2,2,2,1,1},
+            {2,2,2,2,2,2,2,2,2,1},
+            {1,1,4,4,4,1,1,1,1,1},
+            {4,4,4,4,4,1,1,1,1,1},
+            {4,4,4,4,4,1,1,1,1,1},
+            {4,4,4,4,4,1,1,1,1,1},
+            {4,4,4,4,4,1,1,1,1,1},
+            {4,4,4,4,4,4,4,4,4,4} };
+        private int[,] aceStrategy = new int[10, 10] {
+            {1,1,1,2,2,1,1,1,1,1},
+            {1,1,1,2,2,1,1,1,1,1},
+            {1,1,2,2,2,1,1,1,1,1},
+            {1,1,2,2,2,1,1,1,1,1},
+            {1,2,2,2,2,1,1,1,1,1},
+            {2,2,2,2,2,4,4,1,1,1},
+            {4,4,4,4,2,4,4,4,4,4},
+            {4,4,4,4,4,4,4,4,4,4},
+            {4,4,4,4,4,4,4,4,4,4},
+            {4,4,4,4,4,4,4,4,4,4} };
+        private int[,] pairStrategy = new int[10, 10] {
+            {3,3,3,3,3,3,1,1,1,1},
+            {1,3,3,3,3,3,1,1,1,1},
+            {1,1,1,3,3,1,1,1,1,1},
+            {2,2,2,2,2,2,2,2,1,1},
+            {4,4,4,4,4,4,1,1,1,1},
+            {4,4,4,4,4,4,1,1,1,1},
+            {4,4,4,4,4,4,4,1,1,1},
+            {3,3,3,3,3,4,3,3,4,4},
+            {4,4,4,4,4,4,4,4,4,4},
+            {3,3,3,3,3,3,3,3,3,3} };
         List<int> playerCards = new List<int>();
         int act = 0;
         int actRemaining = 2;
@@ -174,12 +143,6 @@ namespace BlackJack
         int parentCard = 0;
         int ph = 0;
         int cloneFlag = 0;
-        public static void DataInitialization()
-        {
-            SetData(sumStrategy, sumStrategyData);
-            SetData(aceStrategy, aceStrategyData);
-            SetData(pairStrategy, pairStrategyData);
-        }
         public BlackJackGame(int parentCard)
         {
             act = 2;
@@ -319,16 +282,6 @@ namespace BlackJack
                     case 15: return 7;
                     case 16: return 8;
                     default: return 9; 
-                }
-            }
-        }
-        private static void SetData(int[,] l, string data)
-        {
-            for(int i = 0; i < 10; i++)
-            {
-                for(var j = 0; j < 10; j++)
-                {
-                    l[i,j] = int.Parse(data.Substring(i * 10 + j,1));
                 }
             }
         }
