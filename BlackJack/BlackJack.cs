@@ -35,31 +35,22 @@ namespace BlackJack
             int sum = SumParent(parentCards);
             if(sum > 21)
             {
-                Win(bet, cloneFlag);
+                End(bet, cloneFlag);
             } else if(playerCardSum > sum)
             {
-                Win(bet, cloneFlag);
+                End(bet, cloneFlag);
             } else if (playerCardSum < sum)
             {
-                Lose(bet, cloneFlag);
+                End(bet * -1, cloneFlag);
             } else
             {
-                Win(0, cloneFlag);
+                End(0, cloneFlag);
             }
 
         }
-        public static void Win(int bet ,int cloneFlag)
+        public static void End(int bet, int cloneFlag)
         {
             totalmoney = totalmoney + bet;
-            End(cloneFlag);
-        }
-        public static void Lose(int bet, int cloneFlag)
-        {
-            totalmoney = totalmoney - bet;
-            End(cloneFlag);
-        }
-        public static void End(int cloneFlag)
-        {
             Console.WriteLine(totalmoney);
             if (simCount < maxSim)
             {
@@ -103,7 +94,8 @@ namespace BlackJack
     }
     internal class BlackJackGame
     {
-        private int[,] sumStrategy = new int[10, 10] {
+        //Basic strategy sample
+        private int[,] basicStrategy = new int[29, 10] {
             {1,1,1,1,1,1,1,1,1,1},
             {1,2,2,2,2,1,1,1,1,1},
             {2,2,2,2,2,2,2,2,1,1},
@@ -113,29 +105,26 @@ namespace BlackJack
             {4,4,4,4,4,1,1,1,1,1},
             {4,4,4,4,4,1,1,1,1,1},
             {4,4,4,4,4,1,1,1,1,1},
-            {4,4,4,4,4,4,4,4,4,4} };
-        private int[,] aceStrategy = new int[10, 10] {
+            {4,4,4,4,4,4,4,4,4,4},
             {1,1,1,2,2,1,1,1,1,1},
             {1,1,1,2,2,1,1,1,1,1},
             {1,1,2,2,2,1,1,1,1,1},
             {1,1,2,2,2,1,1,1,1,1},
             {1,2,2,2,2,1,1,1,1,1},
-            {2,2,2,2,2,4,4,1,1,1},
-            {4,4,4,4,2,4,4,4,4,4},
+            {4,2,2,2,2,4,4,1,1,1},
             {4,4,4,4,4,4,4,4,4,4},
             {4,4,4,4,4,4,4,4,4,4},
-            {4,4,4,4,4,4,4,4,4,4} };
-        private int[,] pairStrategy = new int[10, 10] {
+            {4,4,4,4,4,4,4,4,4,4},
             {3,3,3,3,3,3,1,1,1,1},
             {1,3,3,3,3,3,1,1,1,1},
             {1,1,1,3,3,1,1,1,1,1},
             {2,2,2,2,2,2,2,2,1,1},
-            {4,4,4,4,4,4,1,1,1,1},
-            {4,4,4,4,4,4,1,1,1,1},
-            {4,4,4,4,4,4,4,1,1,1},
+            {3,3,3,3,3,3,1,1,1,1},
+            {3,3,3,3,3,3,1,1,1,1},
+            {3,3,3,3,3,3,3,1,1,1},
             {3,3,3,3,3,4,3,3,4,4},
             {4,4,4,4,4,4,4,4,4,4},
-            {3,3,3,3,3,3,3,3,3,3} };
+            {3,3,3,3,3,3,3,3,3,3}};
         List<int> playerCards = new List<int>();
         int act = 0;
         int actRemaining = 2;
@@ -155,7 +144,7 @@ namespace BlackJack
             if (Trunp.IDtoValue(playerCards[0]) == 11 && Trunp.IDtoValue(playerCards[1]) == 10)
             {
                 Console.WriteLine("BlackJack!!");
-                BlackJackSimulation.Win((int)(bet * 0.5), cloneFlag);
+                BlackJackSimulation.End((int)(bet * 0.5), cloneFlag);
             }
             else
             {
@@ -188,19 +177,19 @@ namespace BlackJack
                         if (playerCards[0] == playerCards[1])
                         {
                             Console.WriteLine("pairStrategy");
-                            act = pairStrategy[Trunp.IDtoValue(playerCards[0]) - 2, Trunp.IDtoValue(parentCard) - 2];
+                            act = basicStrategy[Trunp.IDtoValue(playerCards[0]) + 17, Trunp.IDtoValue(parentCard) - 2];
                         }
                         else if (Trunp.aceNum(playerCards) > 0)
                         {
-                            act = aceStrategy[Trunp.IDtoValue(playerCards[1]) - 2, Trunp.IDtoValue(parentCard) - 2];
+                            act = basicStrategy[Trunp.IDtoValue(playerCards[1]) + 8, Trunp.IDtoValue(parentCard) - 2];
                         }
                         else
                         {
-                            act = sumStrategy[SumColumn(SumPlayer()), Trunp.IDtoValue(parentCard) - 2];
+                            act = basicStrategy[SumColumn(SumPlayer()), Trunp.IDtoValue(parentCard) - 2];
                         }
                         break;
                     case 2:
-                            act = sumStrategy[SumColumn(SumPlayer()), Trunp.IDtoValue(parentCard) - 2];
+                            act = basicStrategy[SumColumn(SumPlayer()), Trunp.IDtoValue(parentCard) - 2];
                         break;
                 }
 
@@ -218,13 +207,14 @@ namespace BlackJack
                         ph = Trunp.PickRandom();
                         Console.WriteLine("got: " + ph);
                         playerCards.Add(ph);
+                        CheckBust(1);
                         BlackJackSimulation.Stand(SumPlayer(), bet, parentCard, cloneFlag);
                         break;
                     case 3:
                         playerCards.RemoveAt(1);
                         if(playerCards[0] == 1)
                         {
-                            act = 1;
+                            actRemaining = 1;
                         }
                         new BlackJackGame(parentCard,act,playerCards[0],1);
                         ChooseAct(2);
@@ -246,7 +236,7 @@ namespace BlackJack
             {
                 if (sum > 21)
                 {
-                    sum = sum - 10;
+                    sum -= 10;
                 }
             }
             return sum;
@@ -255,7 +245,7 @@ namespace BlackJack
         {
             if(SumPlayer() > 21)
             {
-                BlackJackSimulation.Lose(bet, cloneFlag);
+                BlackJackSimulation.End(bet * -1, cloneFlag);
             } else
             {
                 if(type == 0)
@@ -320,6 +310,18 @@ namespace BlackJack
             foreach (int a in l)
             {
                 sum = sum + IDtoValue(a);
+            }
+            return sum;
+        }
+        public static int nonAceSum(List<int> l)
+        {
+            int sum = 0;
+            foreach (int a in l)
+            {
+                if(a > 1)
+                {
+                    sum = sum + IDtoValue(a);
+                }
             }
             return sum;
         }
